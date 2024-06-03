@@ -98,7 +98,7 @@ dataToProcess.forEach((item) => {
         timeout: 1000 * 60 * 5,
       },
       delay,
-      filename: `${item.text.replace(/\/|\\/g, '-').replace(/\n|\r\n|\r/g, '')}`,
+      filename: `${item.text.replace(/\/|\\/g, '-').replace(/\n|\r/g, '')}`,
     }).source(item.url, ['1920x1080']).destination(destPath).run().then((result) => {
       worksheetDest.addRow([
         { text: item.text, hyperlink: `${result[0].filename}` },
