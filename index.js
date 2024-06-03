@@ -14,7 +14,7 @@ const destPath = argv._[1];
 
 const concurrency = argv.concurrency || 5;
 const delay = argv.delay || 2;
-const destFilename = argv.name || 'main';
+const destFilename = argv.name || 'pages';
 
 if (argv._.length < 2) {
   console.log('用法: node index.js <源 xlsx 文件> <目标目录>');
@@ -56,13 +56,29 @@ worksheetDest.getCell('B1').alignment = { vertical: 'middle', horizontal: 'cente
 
 const dataToProcess = [];
 
+const getCellText = (value) => {
+  if (typeof value === 'object') {
+    if (value.richText) {
+      return value.richText.map((item) => item.text).join('').trim();
+    }
+    else if (value.text) {
+      return value.text.trim();
+    }
+    else {
+      return '';
+    }
+  }
+
+  return value.trim();
+};
+
 worksheetSource.eachRow((row) => {
   const text = row.values[1];
   const url = row.values[2];
 
   dataToProcess.push({
-    url,
-    text: typeof text === 'object' ? text.text: text,
+    url: getCellText(url),
+    text: getCellText(text),
   });
 });
 
@@ -79,17 +95,18 @@ dataToProcess.forEach((item) => {
     return new Pageres({
       launchOptions: {
         headless: 'new',
+        timeout: 1000 * 60 * 5,
       },
       delay,
-      filename: `${item.text.replace(/\//g, '-')}`,
+      filename: `${item.text.replace(/\/|\\/g, '-').replace(/\n|\r\n|\r/g, '')}`,
     }).source(item.url, ['1920x1080']).destination(destPath).run().then((result) => {
       worksheetDest.addRow([
         { text: item.text, hyperlink: `${result[0].filename}` },
         item.url,
       ]).commit();
       console.log(`Done: "${result[0].filename}"`);
-    }).catch(() => {
-      console.log(`Error: "${item.url}" "${item.text}"`);
+    }).catch((error) => {
+      console.log(`Error: "${item.url}" "${item.text}" "${error}"`);
     });
   });
 });
