@@ -17,6 +17,7 @@ node index.js <源 xlsx 文件> <目标目录> --concurrency 并发数 --delay �
 * --concurrency: 并发数，默认是 5
 * --delay: 延迟多少秒截图，默认 2 秒
 * --name: 输出的 xlsx 文件名，默认是 `pages`，自动添加 `.xlsx` 扩展名。
+* --exec: 指定 chrome 可执行文件的绝对路径，不指定则使用程序默认位置
 
 ### 示例
 

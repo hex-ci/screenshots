@@ -15,6 +15,7 @@ const destPath = argv._[1];
 const concurrency = argv.concurrency || 5;
 const delay = argv.delay || 2;
 const destFilename = argv.name || 'pages';
+const executablePath = argv.exec;
 
 if (argv._.length < 2) {
   console.log('用法: node index.js <源 xlsx 文件> <目标目录>');
@@ -96,7 +97,9 @@ dataToProcess.forEach((item) => {
       launchOptions: {
         headless: 'new',
         timeout: 1000 * 60 * 5,
+        executablePath,
       },
+      timeout: 1000 * 60 * 5,
       delay,
       filename: `${item.text.replace(/\/|\\/g, '-').replace(/\n|\r/g, '')}`,
     }).source(item.url, ['1920x1080']).destination(destPath).run().then((result) => {
@@ -104,8 +107,16 @@ dataToProcess.forEach((item) => {
         { text: item.text, hyperlink: `${result[0].filename}` },
         item.url,
       ]).commit();
+
       console.log(`Done: "${result[0].filename}"`);
     }).catch((error) => {
+      const row = worksheetDest.addRow([
+        item.text,
+        item.url,
+      ]);
+      row.getCell(1).font = { color: { argb: 'FFFF0000'} };
+      row.commit();
+
       console.log(`Error: "${item.url}" "${item.text}" "${error}"`);
     });
   });
