@@ -70,16 +70,20 @@ const getCellText = (value) => {
     }
   }
 
-  return value.trim();
+  return value?.trim() ?? '';
 };
 
 worksheetSource.eachRow((row) => {
-  const text = row.values[1];
-  const url = row.values[2];
+  const text = getCellText(row.values[1]);
+  const url = getCellText(row.values[2]);
+
+  if (!text || !url) {
+    return;
+  }
 
   dataToProcess.push({
-    url: getCellText(url),
-    text: getCellText(text),
+    url,
+    text,
   });
 });
 
